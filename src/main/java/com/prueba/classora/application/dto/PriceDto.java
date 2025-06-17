@@ -1,4 +1,4 @@
-package com.prueba.classora.application.in.dto;
+package com.prueba.classora.application.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

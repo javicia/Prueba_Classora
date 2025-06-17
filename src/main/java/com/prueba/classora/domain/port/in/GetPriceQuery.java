@@ -1,4 +1,6 @@
 package com.prueba.classora.domain.port.in;
 
-public record GetPriceQuery() {
-}
+import java.time.LocalDateTime;
+
+public record GetPriceQuery(LocalDateTime applicationDate, Long productId, Integer
+                            brandId) { }

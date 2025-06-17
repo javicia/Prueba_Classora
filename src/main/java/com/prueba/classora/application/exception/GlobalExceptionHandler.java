@@ -1,10 +1,10 @@
-package com.prueba.classora.domain.exception;
+package com.prueba.classora.application.exception;
 
-import org.springframework.core.Ordered;
-import org.springframework.core.codec.DecodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,6 +24,18 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    /* ---------------------------------------------------------------------
+     * 404 – NOT FOUND (dominio)
+     * ------------------------------------------------------------------ */
+    @ExceptionHandler(PriceNotFoundException.class)
+    public Mono<ResponseEntity<String>> handlePriceNotFound(PriceNotFoundException ex) {
+        log.warn("No se encontró precio: {}", ex.getMessage());
+        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage()));
+    }
+
+    /* ---------------------------------------------------------------------
+     * 400 – BAD REQUEST
+     * ------------------------------------------------------------------ */
 
     /** JSON mal formado o cuerpo ilegible. */
     @ExceptionHandler(DecodingException.class)
@@ -32,27 +44,24 @@ public class GlobalExceptionHandler {
         return badRequest("Cuerpo JSON no válido: " + ex.getMessage());
     }
 
-    /** Error de validación/binding en WebFlux (incluye @Valid, @RequestBody, etc.). */
+    /** Error de validación/binding en WebFlux (@Valid, @RequestBody…). */
     @ExceptionHandler(WebExchangeBindException.class)
     public Mono<ResponseEntity<String>> handleWebBind(WebExchangeBindException ex) {
         log.warn("WebExchangeBindException: {}", ex.getMessage());
         return badRequest("Error de validación: " + ex.getMessage());
     }
 
-    /** Error de validación en escenarios no reactivos (por si apareciera). */
+    /** Error de validación en escenarios no reactivos. */
     @ExceptionHandler(BindException.class)
     public Mono<ResponseEntity<String>> handleBind(BindException ex) {
         log.warn("BindException: {}", ex.getMessage());
         return badRequest("Error de validación: " + ex.getMessage());
     }
 
-    /**
-     * JSON mal formado: lo lanza Jackson wrapped en ServerWebInputException o
-     * en HttpMessageReadException antes de llegar al controller.
-     */
+    /** JSON mal formado detectado por Spring antes de llegar al controller. */
     @ExceptionHandler(ServerWebInputException.class)
     public Mono<ResponseEntity<String>> handleInvalidJson(ServerWebInputException ex) {
-        String reason = ex.getReason();  // suele contener el mensaje de Jackson
+        String reason = ex.getReason();
         log.warn("JSON inválido: {}", reason, ex);
         return badRequest("Cuerpo JSON no válido: " + reason);
     }
@@ -64,21 +73,20 @@ public class GlobalExceptionHandler {
         return badRequest("Parámetros incorrectos: " + ex.getMessage());
     }
 
-    /* -------------------------------------------------------------------------
+    /* ---------------------------------------------------------------------
      * 403 – FORBIDDEN
-     * ---------------------------------------------------------------------- */
-
+     * ------------------------------------------------------------------ */
     @ExceptionHandler(AccessDeniedException.class)
     public Mono<ResponseEntity<String>> handleForbidden(AccessDeniedException ex) {
         log.warn("AccessDeniedException");
         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado"));
     }
 
-    /* -------------------------------------------------------------------------
+    /* ---------------------------------------------------------------------
      * 500 – INTERNAL SERVER ERROR
-     * ---------------------------------------------------------------------- */
+     * ------------------------------------------------------------------ */
 
-    /** Problemas de IO genéricos (conexiones, ficheros, etc.). */
+    /** Problemas de IO genéricos. */
     @ExceptionHandler(IOException.class)
     public Mono<ResponseEntity<String>> handleIO(IOException ex) {
         log.error("IOException", ex);
@@ -99,9 +107,9 @@ public class GlobalExceptionHandler {
         return internal("Error interno");
     }
 
-    /* --------------------------------------------------------------------- */
-
-    /* Utilidades privadas para crear respuestas. */
+    /* ---------------------------------------------------------------------
+     * Helpers
+     * ------------------------------------------------------------------ */
     private Mono<ResponseEntity<String>> badRequest(String body) {
         return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body));
     }

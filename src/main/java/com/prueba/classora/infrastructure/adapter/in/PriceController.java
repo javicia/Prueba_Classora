@@ -1,9 +1,8 @@
-package com.prueba.classora.infrastructure.adapter.in.rest;
+package com.prueba.classora.infrastructure.adapter.in;
 
 import com.prueba.classora.application.service.PriceService;
 import com.prueba.classora.domain.port.in.GetPriceQuery;
-import com.prueba.classora.infrastructure.adapter.in.PriceResponse;
-import com.prueba.classora.infrastructure.persistence.mapper.PriceMapper;
+import com.prueba.classora.infrastructure.mapper.PriceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +24,7 @@ public class PriceController {
     @GetMapping
     public Mono<PriceResponse> getPrice(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime applicationDate,
                                         @RequestParam Long productId,
-                                        @RequestParam Long brandId) {
+                                        @RequestParam Integer brandId) {
         GetPriceQuery query = new GetPriceQuery(applicationDate, productId, brandId);
         return service.getPrice(query).map(mapper::toResponse);
     }

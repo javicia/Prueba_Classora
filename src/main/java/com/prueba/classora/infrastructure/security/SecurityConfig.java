@@ -1,4 +1,4 @@
-package com.prueba.inditex.infrastructure.security;
+package com.prueba.classora.infrastructure.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
                 .authorizeExchange(ex -> ex
-                        .pathMatchers(HttpMethod.PUT, "/api/audit/register").authenticated()
+                        .pathMatchers(HttpMethod.PUT, "/prices/**").authenticated()
                         .anyExchange().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .build();
